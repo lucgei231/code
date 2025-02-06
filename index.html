@@ -1,160 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Block Coder</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 50px;
-            height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <title>HTML Block Coder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    #header { background: #333; color: white; padding: 10px; text-align: center; }
+    #main { display: flex; flex: 1; overflow: hidden; }
 
-        .top-bar {
-            width: 100%;
-            height: 50px;
-            background: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
+    #palette {
+      width: 250px;
+      background: #f5f5f5;
+      border-right: 1px solid #ccc;
+      overflow: auto;
+      padding: 10px;
+    }
+    #tabButtons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    #tabButtons button {
+      flex: 1 1 30%;
+      margin: 2px;
+      padding: 5px;
+      cursor: pointer;
+      border: none;
+      background: #ddd;
+      border-radius: 3px;
+    }
+    #tabButtons button.active { background: #bbb; }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            display: flex;
-            gap: 20px;
-            width: 90%;
-            max-width: 1200px;
-        }
+    .tabContent { display: none; }
+    .tabContent.active { display: block; }
 
-        .block-palette, .workspace {
-            flex: 1;
-            padding: 20px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: #f9f9f9;
-        }
+    .block {
+      position: relative;
+      margin: 8px 0;
+      padding: 10px 5px;
+      border-radius: 4px;
+      background: #e0e0e0;
+      cursor: grab;
+      user-select: none;
+      text-align: center;
+      font-size: 14px;
+    }
+    .block:before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: #ccc;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    .block:after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: #ccc;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
 
-        .block {
-            background: #fff;
-            border: 2px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: grab;
-            transition: transform 0.2s;
-        }
+    /* Group-specific colors */
+    .group-iframe       { background: #FFCCCC; }
+    .group-math         { background: #CCFFCC; }
+    .group-JavaScript   { background: #CCCCFF; }
+    .group-CSS          { background: #FFFFCC; }
+    .group-looks        { background: #FFCCFF; }
+    .group-backgrounds  { background: #CCFFFF; }
+    .group-logic        { background: #F0F0F0; }
+    .group-variables    { background: #FFD700; }
+    .group-loops        { background: #FFA07A; }
+    .group-events       { background: #90EE90; }
 
-        .block:hover {
-            transform: scale(1.05);
-            background: #e6f7ff;
-        }
+    #workspace {
+      flex: 1;
+      border: 1px solid #ccc;
+      margin: 10px;
+      background: #fff;
+      position: relative;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #workspace .block { cursor: default; margin: 5px 0; }
+    #workspace input[type="text"] {
+      width: 60px;
+      margin: 2px;
+      font-size: 12px;
+      padding: 2px;
+    }
 
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
+    #rightPanel {
+      width: 350px;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #ccc;
+    }
+    #controls {
+      padding: 10px;
+      background: #eee;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #controls button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #previewText {
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      background: #f9f9f9;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    #previewText pre { white-space: pre-wrap; }
+    #previewOutput {
+      flex: 1;
+      overflow: hidden;
+    }
+    #previewOutput iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #6200ea;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    .flag-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .green-flag { background: #4CAF50; }
+    .red-stop { background: #F44336; }
 
-        button:hover {
-            background: #3700b3;
-        }
-
-        textarea {
-            width: 100%;
-            height: 150px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            resize: none;
-        }
-    </style>
+    #contextMenu {
+      position: absolute;
+      display: none;
+      background: #fff;
+      border: 1px solid #ccc;
+      z-index: 1000;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    #contextMenu ul {
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+    }
+    #contextMenu li {
+      padding: 5px 15px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #contextMenu li:hover {
+      background: #eee;
+    }
+  </style>
 </head>
 <body>
-    <div class="top-bar"></div>
-    <div class="container">
-        <div class="block-palette">
-            <h2>Block Palette</h2>
-            <div class="block" draggable="true" title="Creates a responsive iframe">Responsive iFrame</div>
-            <div class="block" draggable="true" title="Embeds a YouTube video">YouTube Embed</div>
-            <div class="block" draggable="true" title="Adds a clickable button">Button Block</div>
-            <div class="block" draggable="true" title="Adds a text input field">Text Input</div>
-            <div class="block" draggable="true" title="Inserts an image">Image Block</div>
-            <div class="block" draggable="true" title="Creates a form">Form Block</div>
-            <div class="block" draggable="true" title="Adds a heading">Heading Block</div>
-            <div class="block" draggable="true" title="Creates a paragraph of text">Paragraph Block</div>
-            <div class="block" draggable="true" title="Adds a list">List Block</div>
-            <div class="block" draggable="true" title="Embeds a video">Video Embed</div>
+  <div id="header">
+    <h1>HTML Block Coder</h1>
+  </div>
+  <div id="main">
+    <div id="palette">
+      <div id="tabButtons">
+        <button data-tab="iframe" class="active">iframe</button>
+        <button data-tab="math">math</button>
+        <button data-tab="JavaScript">JavaScript</button>
+        <button data-tab="CSS">CSS</button>
+        <button data-tab="looks">looks</button>
+        <button data-tab="backgrounds">backgrounds</button>
+        <button data-tab="logic">logic</button>
+        <button data-tab="variables">variables</button>
+        <button data-tab="loops">loops</button>
+        <button data-tab="events">events</button>
+      </div>
+      <div id="tabs">
+        <div class="tabContent active" data-tab="iframe">
+          <!-- 10 blocks for iframe -->
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe style='width:{width}px; height:{height}px; position:absolute; left:{x}px; top:{z}px' src='{url}'&gt;&lt;/iframe&gt;">
+            Create Responsive Iframe 1<br>
+            width: <input type="text" data-param="width" placeholder="600">
+            height: <input type="text" data-param="height" placeholder="400"><br>
+            at x: <input type="text" data-param="x" placeholder="100">
+            z: <input type="text" data-param="z" placeholder="200"><br>
+            URL: <input type="text" data-param="url" placeholder="http://example.com">
+          </div>
+          <!-- Repeat this block 9 more times, each labeled differently -->
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe style='width:{width}px; height:{height}px; position:absolute; left:{x}px; top:{z}px' src='{url}'&gt;&lt;/iframe&gt;">
+            Create Responsive Iframe 2<br>
+            width: <input type="text" data-param="width" placeholder="600">
+            height: <input type="text" data-param="height" placeholder="400"><br>
+            at x: <input type="text" data-param="x" placeholder="100">
+            z: <input type="text" data-param="z" placeholder="200"><br>
+            URL: <input type="text" data-param="url" placeholder="http://example.com">
+          </div>
+          <!-- Continue adding 8 more blocks for iframe -->
         </div>
-
-        <div class="workspace">
-            <h2>Workspace</h2>
-            <p>Drag your blocks here...</p>
-            <textarea readonly placeholder="Generated code will appear here..."></textarea>
-            <div class="buttons">
-                <button id="copy-code">Copy Code</button>
-                <button id="clear-workspace">Clear Workspace</button>
-            </div>
+        <div class="tabContent" data-tab="math">
+          <!-- 10 blocks for math -->
+          <div class="block group-math" draggable="true" data-code="&lt;div style='width:{width}px; height:{height}px;'&gt;Math Block - Operation: {operation}&lt;/div&gt;">
+            Math Block 1<br>
+            width: <input type="text" data-param="width" placeholder="200">
+            height: <input type="text" data-param="height" placeholder="100"><br>
+            Operation: <input type="text" data-param="operation" placeholder="add">
+          </div>
+          <!-- Repeat 9 more times for math -->
+          <div class="block group-math" draggable="true" data-code="&lt;div style='width:{width}px; height:{height}px;'&gt;Math Block 2 - Operation: {operation}&lt;/div&gt;">
+            Math Block 2<br>
+            width: <input type="text" data-param="width" placeholder="200">
+            height: <input type="text" data-param="height" placeholder="100"><br>
+            Operation: <input type="text" data-param="operation" placeholder="subtract">
+          </div>
+          <!-- Continue adding 8 more blocks for math -->
         </div>
+        <div class="tabContent" data-tab="JavaScript">
+          <!-- 10 blocks for JavaScript -->
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;console.log('{message}')&lt;/script&gt;">
+            JavaScript Block 1<br>
+            Message: <input type="text" data-param="message" placeholder="Hello World">
+          </div>
+          <!-- Repeat 9 more times for JavaScript -->
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;console.log('{message}')&lt;/script&gt;">
+            JavaScript Block 2<br>
+            Message: <input type="text" data-param="message" placeholder="Test">
+          </div>
+          <!-- Continue adding 8 more blocks for JavaScript -->
+        </div>
+        <div class="tabContent" data-tab="CSS">
+          <!-- 10 blocks for CSS -->
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;{selector}{{property}:{value};}&lt;/style&gt;">
+            CSS Block 1<br>
+            Selector: <input type="text" data-param="selector" placeholder=".class">
+            Property: <input type="text" data-param="property" placeholder="color">
+            Value: <input type="text" data-param="value" placeholder="red">
+          </div>
+          <!-- Continue adding 9 more blocks for CSS -->
+        </div>
+        <!-- Repeat the same for the other sections (backgrounds, logic, loops, variables, events) -->
+      </div>
     </div>
 
-    <script>
-        const blocks = document.querySelectorAll('.block');
-        const workspace = document.querySelector('.workspace');
-        const textarea = document.querySelector('textarea');
+    <!-- Workspace -->
+    <div id="workspace"></div>
 
-        blocks.forEach(block => {
-            block.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', block.textContent);
-            });
-        });
+    <!-- Right Panel -->
+    <div id="rightPanel">
+      <div id="controls">
+        <button id="runCode" class="green-flag">Run</button>
+        <button id="stopCode" class="red-stop">Stop</button>
+      </div>
+      <div id="previewText">
+        <pre id="previewCode"></pre>
+      </div>
+      <div id="previewOutput">
+        <iframe id="outputIframe"></iframe>
+      </div>
+    </div>
+  </div>
 
-        workspace.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
+  <script>
+    // Tab functionality
+    document.querySelectorAll('#tabButtons button').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tabContent').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('#tabButtons button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        const tabName = button.getAttribute('data-tab');
+        document.querySelector(`.tabContent[data-tab="${tabName}"]`).classList.add('active');
+      });
+    });
 
-        workspace.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const blockText = e.dataTransfer.getData('text/plain');
-            const newBlock = document.createElement('div');
-            newBlock.textContent = blockText;
-            newBlock.className = 'block';
-            workspace.appendChild(newBlock);
-            updateCode();
-        });
+    // Drag-and-drop functionality for blocks
+    let workspace = document.getElementById('workspace');
+    document.querySelectorAll('.block').forEach(block => {
+      block.addEventListener('dragstart', function(e) {
+        e.dataTransfer.setData('block', JSON.stringify(block.dataset));
+      });
+    });
 
-        document.getElementById('copy-code').addEventListener('click', () => {
-            navigator.clipboard.writeText(textarea.value);
-        });
+    workspace.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
 
-        document.getElementById('clear-workspace').addEventListener('click', () => {
-            workspace.innerHTML = '<h2>Workspace</h2><p>Drag your blocks here...</p>';
-            updateCode();
-        });
+    workspace.addEventListener('drop', function(e) {
+      e.preventDefault();
+      let data = e.dataTransfer.getData('block');
+      let blockData = JSON.parse(data);
+      let newBlock = document.createElement('div');
+      newBlock.classList.add('block', blockData.class);
+      newBlock.innerHTML = blockData.code;
+      workspace.appendChild(newBlock);
+    });
 
-        function updateCode() {
-            const blocks = workspace.querySelectorAll('.block');
-            textarea.value = Array.from(blocks).map(block => `<!-- ${block.textContent} -->`).join('\n');
-        }
-    </script>
+    // Right-click menu for blocks
+    let contextMenu = document.createElement('div');
+    contextMenu.id = 'contextMenu';
+    contextMenu.innerHTML = `
+      <ul>
+        <li id="copy">Copy</li>
+        <li id="paste">Paste</li>
+        <li id="delete">Delete</li>
+      </ul>
+    `;
+    document.body.appendChild(contextMenu);
+
+    document.addEventListener('contextmenu', function(e) {
+      if (e.target.classList.contains('block')) {
+        e.preventDefault();
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = `${e.pageX}px`;
+        contextMenu.style.top = `${e.pageY}px`;
+      } else {
+        contextMenu.style.display = 'none';
+      }
+    });
+
+    document.getElementById('copy').addEventListener('click', function() {
+      let block = document.querySelector('.block:hover');
+      let copiedBlock = block.cloneNode(true);
+      workspace.appendChild(copiedBlock);
+      contextMenu.style.display = 'none';
+    });
+
+    document.getElementById('paste').addEventListener('click', function() {
+      contextMenu.style.display = 'none';
+      // Add paste functionality if needed
+    });
+
+    document.getElementById('delete').addEventListener('click', function() {
+      let block = document.querySelector('.block:hover');
+      block.remove();
+      contextMenu.style.display = 'none';
+    });
+  </script>
 </body>
 </html>
