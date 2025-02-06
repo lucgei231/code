@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Block Editor with Input Fields</title>
+  <style>
+    /* General resets and layout */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    #header { background: #333; color: white; padding: 10px; text-align: center; }
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* Left Palette */
+    #palette {
+      width: 250px;
+      background: #f5f5f5;
+      border-right: 1px solid #ccc;
+      overflow: auto;
+      padding: 10px;
+    }
+    /* Tab buttons */
+    #tabButtons {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    #tabButtons button {
+      flex: 1 1 30%;
+      margin: 2px;
+      padding: 5px;
+      cursor: pointer;
+      border: none;
+      background: #ddd;
+      border-radius: 3px;
+    }
+    #tabButtons button.active { background: #bbb; }
+
+    /* Tab content */
+    .tabContent { display: none; }
+    .tabContent.active { display: block; }
+    
+    /* Block styling with “notches” on top and bottom */
+    .block {
+      position: relative;
+      margin: 8px 0;
+      padding: 10px 5px;
+      border-radius: 4px;
+      background: #e0e0e0;
+      cursor: grab;
+      user-select: none;
+      text-align: center;
+      font-size: 14px;
+    }
+    /* Top notch */
+    .block:before {
+      content: "";
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: #ccc;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    /* Bottom notch */
+    .block:after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 6px;
+      background: #ccc;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+    
+    /* Group-specific colors */
+    .group-iframe       { background: #FFCCCC; }
+    .group-math         { background: #CCFFCC; }
+    .group-JavaScript   { background: #CCCCFF; }
+    .group-CSS          { background: #FFFFCC; }
+    .group-looks        { background: #FFCCFF; }
+    .group-backgrounds  { background: #CCFFFF; }
+    .group-logic        { background: #F0F0F0; }
+    .group-variables    { background: #FFD700; }
+    .group-loops        { background: #FFA07A; }
+    .group-events       { background: #90EE90; }
+
+    /* Center Workspace */
+    #workspace {
+      flex: 1;
+      border: 1px solid #ccc;
+      margin: 10px;
+      background: #fff;
+      position: relative;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #workspace .block { cursor: default; margin: 5px 0; }
+    #workspace input[type="text"] {
+      width: 60px;
+      margin: 2px;
+      font-size: 12px;
+      padding: 2px;
+    }
+
+    /* Right Panel: Controls and Previews */
+    #rightPanel {
+      width: 350px;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid #ccc;
+    }
+    #controls {
+      padding: 10px;
+      background: #eee;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+    }
+    #controls button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #previewText {
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      background: #f9f9f9;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    #previewText pre { white-space: pre-wrap; }
+    #previewOutput {
+      flex: 1;
+      overflow: hidden;
+    }
+    #previewOutput iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Custom Context Menu */
+    #contextMenu {
+      position: absolute;
+      display: none;
+      background: #fff;
+      border: 1px solid #ccc;
+      z-index: 1000;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    #contextMenu ul {
+      list-style: none;
+      margin: 0;
+      padding: 5px 0;
+    }
+    #contextMenu li {
+      padding: 5px 15px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #contextMenu li:hover {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <h1>Advanced Block Editor with Input Fields</h1>
+    <p>Drag blocks from the palette into the workspace, fill in input fields, right‑click on a block for options, and press the green flag to run the generated code.</p>
+  </div>
+  <div id="main">
+    <!-- Left Palette -->
+    <div id="palette">
+      <div id="tabButtons">
+        <!-- 10 Tab Buttons -->
+        <button data-tab="iframe" class="active">iframe</button>
+        <button data-tab="math">math</button>
+        <button data-tab="JavaScript">JavaScript</button>
+        <button data-tab="CSS">CSS</button>
+        <button data-tab="looks">looks</button>
+        <button data-tab="backgrounds">backgrounds</button>
+        <button data-tab="logic">logic</button>
+        <button data-tab="variables">variables</button>
+        <button data-tab="loops">loops</button>
+        <button data-tab="events">events</button>
+      </div>
+      <div id="tabs">
+        <!-- Group: iframe -->
+        <div class="tabContent active" data-tab="iframe">
+          <!-- Block 1: Create Responsive Iframe -->
+          <div class="block group-iframe" draggable="true" 
+               title="Creates a responsive iframe element with custom dimensions and a specified URL"
+               data-code="&lt;iframe style='width:{width}px; height:{height}px; position:absolute; left:{x}px; top:{z}px' src='{url}'&gt;&lt;/iframe&gt;">
+            Create Responsive Iframe<br>
+            width: <input type="text" data-param="width" placeholder="600">
+            height: <input type="text" data-param="height" placeholder="400"><br>
+            at x: <input type="text" data-param="x" placeholder="100">
+            z: <input type="text" data-param="z" placeholder="200"><br>
+            URL: <input type="text" data-param="url" placeholder="http://example.com">
+          </div>
+          <!-- Block 2: Embed YouTube Video -->
+          <div class="block group-iframe" draggable="true" 
+               title="Embeds a YouTube video in an iframe with adjustable settings"
+               data-code="&lt;iframe width='560' height='315' src='https://www.youtube.com/embed/{videoID}' frameborder='0' allowfullscreen&gt;&lt;/iframe&gt;">
+            Embed YouTube Video<br>
+            Video ID: <input type="text" data-param="videoID" placeholder="dQw4w9WgXcQ">
+          </div>
+          <!-- Block 3: Embed External Page -->
+          <div class="block group-iframe" draggable="true" 
+               title="Embeds an external webpage into your layout"
+               data-code="&lt;iframe src='{externalURL}' style='border:0; width:100%; height:500px'&gt;&lt;/iframe&gt;">
+            Embed External Page<br>
+            URL: <input type="text" data-param="externalURL" placeholder="http://example.com">
+          </div>
+          <!-- (Additional iframe blocks can be similarly defined) -->
+          <!-- For brevity, only three iframe blocks are shown here -->
+        </div>
+        
+        <!-- Group: math -->
+        <div class="tabContent" data-tab="math">
+          <!-- Block 1: Add Two Numbers -->
+          <div class="block group-math" draggable="true"
+               title="Adds two numbers and returns the sum"
+               data-code="let sum = {a} + {b}; // Add two numbers">
+            Add Two Numbers<br>
+            a: <input type="text" data-param="a" placeholder="1">
+            b: <input type="text" data-param="b" placeholder="2">
+          </div>
+          <!-- Block 2: Subtract Two Numbers -->
+          <div class="block group-math" draggable="true"
+               title="Subtracts the second number from the first"
+               data-code="let diff = {a} - {b}; // Subtract two numbers">
+            Subtract Two Numbers<br>
+            a: <input type="text" data-param="a" placeholder="5">
+            b: <input type="text" data-param="b" placeholder="3">
+          </div>
+          <!-- (Additional math blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: JavaScript -->
+        <div class="tabContent" data-tab="JavaScript">
+          <!-- Block 1: Log Debug Message -->
+          <div class="block group-JavaScript" draggable="true"
+               title="Logs a debug message to the console"
+               data-code="console.log('{message}');">
+            Log Debug Message<br>
+            Message: <input type="text" data-param="message" placeholder="Debug message">
+          </div>
+          <!-- Block 2: Initialize App -->
+          <div class="block group-JavaScript" draggable="true"
+               title="Initializes the main application"
+               data-code="function initApp() { {code} }">
+            Initialize App<br>
+            Code: <input type="text" data-param="code" placeholder="/* init code */">
+          </div>
+          <!-- (Additional JavaScript blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: CSS -->
+        <div class="tabContent" data-tab="CSS">
+          <!-- Block 1: Apply Background Color -->
+          <div class="block group-CSS" draggable="true"
+               title="Applies a custom background color to an element"
+               data-code="element.style.backgroundColor = '{color}';">
+            Apply Background Color<br>
+            Color: <input type="text" data-param="color" placeholder="#ff0000">
+          </div>
+          <!-- Block 2: Set Font Style -->
+          <div class="block group-CSS" draggable="true"
+               title="Sets a custom font style"
+               data-code="element.style.fontFamily = '{font}';">
+            Set Font Style<br>
+            Font: <input type="text" data-param="font" placeholder="Arial, sans-serif">
+          </div>
+          <!-- (Additional CSS blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: looks -->
+        <div class="tabContent" data-tab="looks">
+          <!-- Block 1: Change Theme -->
+          <div class="block group-looks" draggable="true"
+               title="Changes the overall theme of the application"
+               data-code="document.body.className = '{theme}';">
+            Change Theme<br>
+            Theme: <input type="text" data-param="theme" placeholder="theme-dark">
+          </div>
+          <!-- (Additional looks blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: backgrounds -->
+        <div class="tabContent" data-tab="backgrounds">
+          <!-- Block 1: Set Image Background -->
+          <div class="block group-backgrounds" draggable="true"
+               title="Sets an image as the background"
+               data-code="document.body.style.backgroundImage = 'url({imageURL})';">
+            Set Image Background<br>
+            Image URL: <input type="text" data-param="imageURL" placeholder="http://example.com/image.jpg">
+          </div>
+          <!-- (Additional backgrounds blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: logic -->
+        <div class="tabContent" data-tab="logic">
+          <!-- Block 1: If-Else Condition -->
+          <div class="block group-logic" draggable="true"
+               title="Executes an if-else condition"
+               data-code="if({condition}) { {ifCode} } else { {elseCode} }">
+            If-Else Condition<br>
+            Condition: <input type="text" data-param="condition" placeholder="x > 0"><br>
+            If: <input type="text" data-param="ifCode" placeholder="/* if code */"><br>
+            Else: <input type="text" data-param="elseCode" placeholder="/* else code */">
+          </div>
+          <!-- (Additional logic blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: variables -->
+        <div class="tabContent" data-tab="variables">
+          <!-- Block 1: Declare Integer Variable -->
+          <div class="block group-variables" draggable="true"
+               title="Declares an integer variable"
+               data-code="let {varName} = {value};">
+            Declare Integer Variable<br>
+            Name: <input type="text" data-param="varName" placeholder="counter">
+            Value: <input type="text" data-param="value" placeholder="0">
+          </div>
+          <!-- (Additional variables blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: loops -->
+        <div class="tabContent" data-tab="loops">
+          <!-- Block 1: For Loop Iteration -->
+          <div class="block group-loops" draggable="true"
+               title="Performs a for loop iteration"
+               data-code="for(let i=0;i<{limit};i++){ {code} }">
+            For Loop Iteration<br>
+            Limit: <input type="text" data-param="limit" placeholder="10"><br>
+            Code: <input type="text" data-param="code" placeholder="/* code */">
+          </div>
+          <!-- (Additional loops blocks can be similarly defined) -->
+        </div>
+        
+        <!-- Group: events -->
+        <div class="tabContent" data-tab="events">
+          <!-- Block 1: On Click Event -->
+          <div class="block group-events" draggable="true"
+               title="Attaches an on-click event to an element"
+               data-code="element.addEventListener('click', () => { {code} });">
+            On Click Event<br>
+            Code: <input type="text" data-param="code" placeholder="/* code */">
+          </div>
+          <!-- (Additional events blocks can be similarly defined) -->
+        </div>
+      </div>
+    </div>
+    
+    <!-- Center Workspace -->
+    <div id="workspace" ondragover="event.preventDefault();">
+      <p style="color:#999; text-align:center;">Drag your blocks here...</p>
+    </div>
+    
+    <!-- Right Panel: Controls and Previews -->
+    <div id="rightPanel">
+      <div id="controls">
+        <button id="download">Download HTML</button>
+        <button id="greenFlag" style="background:#4CAF50; color:white;">&#9658; Run</button>
+        <button id="stop" style="background:#F44336; color:white;">&#9632; Stop</button>
+      </div>
+      <div id="previewText">
+        <pre id="codePreview">// Your generated code will appear here...</pre>
+      </div>
+      <div id="previewOutput">
+        <iframe id="outputFrame"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Context Menu for Blocks -->
+  <div id="contextMenu">
+    <ul>
+      <li data-action="delete">Delete</li>
+      <li data-action="copy">Copy</li>
+      <li data-action="paste">Paste</li>
+    </ul>
+  </div>
+  
+  <script>
+    // --- Tab Switching Logic ---
+    const tabButtons = document.querySelectorAll('#tabButtons button');
+    const tabContents = document.querySelectorAll('.tabContent');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelector('.tabContent[data-tab="'+btn.dataset.tab+'"]').classList.add('active');
+      });
+    });
+    
+    // --- Drag and Drop from Palette to Workspace ---
+    let draggedBlock = null;
+    document.querySelectorAll('#palette .block').forEach(block => {
+      block.addEventListener('dragstart', (e) => {
+        draggedBlock = block;
+        e.dataTransfer.setData("text/plain", block.dataset.code);
+      });
+    });
+    
+    const workspace = document.getElementById('workspace');
+    workspace.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (draggedBlock) {
+        // Clone the block, including its input elements
+        const clone = draggedBlock.cloneNode(true);
+        clone.setAttribute('draggable', 'false');
+        addContextMenuHandler(clone);
+        workspace.appendChild(clone);
+        updateCodePreview();
+      }
+    });
+    
+    // --- Get Block Code with Input Substitution ---
+    function getBlockCode(block) {
+      let template = block.dataset.code || "";
+      // For each input field with a data-param attribute, replace placeholder with its value or placeholder text.
+      const inputs = block.querySelectorAll('input[data-param]');
+      inputs.forEach(input => {
+        const param = input.dataset.param;
+        const value = input.value.trim() || input.placeholder;
+        template = template.replace(new RegExp(`\\{${param}\\}`, 'g'), value);
+      });
+      return template;
+    }
+    
+    // --- Update Code Preview ---
+    function updateCodePreview() {
+      const blocks = workspace.querySelectorAll('.block');
+      let code = "";
+      blocks.forEach(b => {
+        code += getBlockCode(b) + "\n";
+      });
+      document.getElementById('codePreview').textContent = code || "// Your generated code will appear here...";
+    }
+    
+    // --- Run and Stop Buttons ---
+    document.getElementById('greenFlag').addEventListener('click', () => {
+      const code = document.getElementById('codePreview').textContent;
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Preview Output</title>
+  <style>
+    body { margin: 10px; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+      document.getElementById('outputFrame').srcdoc = html;
+    });
+    
+    document.getElementById('stop').addEventListener('click', () => {
+      document.getElementById('outputFrame').srcdoc = "";
+    });
+    
+    // --- Download Button ---
+    document.getElementById('download').addEventListener('click', () => {
+      const code = document.getElementById('codePreview').textContent;
+      const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Downloaded Code</title>
+</head>
+<body>
+${code}
+</body>
+</html>`;
+      const blob = new Blob([fullHtml], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "generated_code.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+    
+    // --- Custom Right-Click Context Menu ---
+    let copiedBlockData = null;
+    const contextMenu = document.getElementById('contextMenu');
+    let currentBlock = null;
+    
+    function addContextMenuHandler(block) {
+      block.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        currentBlock = block;
+        showContextMenu(e.pageX, e.pageY);
+      });
+    }
+    
+    // Attach context menu handler for blocks already in the workspace
+    workspace.querySelectorAll('.block').forEach(addContextMenuHandler);
+    
+    function showContextMenu(x, y) {
+      contextMenu.style.left = x + 'px';
+      contextMenu.style.top = y + 'px';
+      contextMenu.style.display = 'block';
+    }
+    
+    document.addEventListener('click', () => {
+      contextMenu.style.display = 'none';
+    });
+    
+    contextMenu.addEventListener('click', (e) => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      if (action === 'delete' && currentBlock) {
+        currentBlock.remove();
+      } else if (action === 'copy' && currentBlock) {
+        copiedBlockData = {
+          code: currentBlock.dataset.code,
+          title: currentBlock.title,
+          innerHTML: currentBlock.innerHTML,
+          classList: currentBlock.className
+        };
+      } else if (action === 'paste' && copiedBlockData) {
+        const newBlock = document.createElement('div');
+        newBlock.className = copiedBlockData.classList;
+        newBlock.setAttribute('draggable', 'false');
+        newBlock.dataset.code = copiedBlockData.code;
+        newBlock.title = copiedBlockData.title;
+        newBlock.innerHTML = copiedBlockData.innerHTML;
+        addContextMenuHandler(newBlock);
+        workspace.appendChild(newBlock);
+      }
+      updateCodePreview();
+      contextMenu.style.display = 'none';
+    });
+    
+    // Update preview whenever an input value changes in the workspace
+    workspace.addEventListener('input', updateCodePreview);
+  </script>
+</body>
+</html>
