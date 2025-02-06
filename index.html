@@ -46,6 +46,7 @@
       text-align: center;
       font-size: 14px;
     }
+
     .block:before {
       content: "";
       position: absolute;
@@ -58,6 +59,7 @@
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
     }
+
     .block:after {
       content: "";
       position: absolute;
@@ -76,7 +78,6 @@
     .group-math         { background: #CCFFCC; }
     .group-JavaScript   { background: #CCCCFF; }
     .group-CSS          { background: #FFFFCC; }
-    .group-looks        { background: #FFCCFF; }
     .group-backgrounds  { background: #CCFFFF; }
     .group-logic        { background: #F0F0F0; }
     .group-variables    { background: #FFD700; }
@@ -92,13 +93,6 @@
       overflow-y: auto;
       padding: 10px;
     }
-    #workspace .block { cursor: default; margin: 5px 0; }
-    #workspace input[type="text"] {
-      width: 60px;
-      margin: 2px;
-      font-size: 12px;
-      padding: 2px;
-    }
 
     #rightPanel {
       width: 350px;
@@ -106,6 +100,7 @@
       flex-direction: column;
       border-left: 1px solid #ccc;
     }
+
     #controls {
       padding: 10px;
       background: #eee;
@@ -114,6 +109,7 @@
       justify-content: space-between;
       align-items: center;
     }
+
     #controls button {
       padding: 5px 10px;
       border: none;
@@ -121,6 +117,7 @@
       cursor: pointer;
       font-size: 14px;
     }
+
     #previewText {
       flex: 1;
       overflow: auto;
@@ -130,11 +127,12 @@
       font-family: monospace;
       font-size: 13px;
     }
-    #previewText pre { white-space: pre-wrap; }
+
     #previewOutput {
       flex: 1;
       overflow: hidden;
     }
+
     #previewOutput iframe {
       width: 100%;
       height: 100%;
@@ -150,30 +148,9 @@
       border-radius: 50%;
       cursor: pointer;
     }
+
     .green-flag { background: #4CAF50; }
     .red-stop { background: #F44336; }
-
-    #contextMenu {
-      position: absolute;
-      display: none;
-      background: #fff;
-      border: 1px solid #ccc;
-      z-index: 1000;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-    }
-    #contextMenu ul {
-      list-style: none;
-      margin: 0;
-      padding: 5px 0;
-    }
-    #contextMenu li {
-      padding: 5px 15px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    #contextMenu li:hover {
-      background: #eee;
-    }
   </style>
 </head>
 <body>
@@ -187,7 +164,6 @@
         <button data-tab="math">math</button>
         <button data-tab="JavaScript">JavaScript</button>
         <button data-tab="CSS">CSS</button>
-        <button data-tab="looks">looks</button>
         <button data-tab="backgrounds">backgrounds</button>
         <button data-tab="logic">logic</button>
         <button data-tab="variables">variables</button>
@@ -195,163 +171,186 @@
         <button data-tab="events">events</button>
       </div>
       <div id="tabs">
+        <!-- iframe -->
         <div class="tabContent active" data-tab="iframe">
-          <!-- 10 blocks for iframe -->
-          <div class="block group-iframe" draggable="true" data-code="&lt;iframe style='width:{width}px; height:{height}px; position:absolute; left:{x}px; top:{z}px' src='{url}'&gt;&lt;/iframe&gt;">
-            Create Responsive Iframe 1<br>
-            width: <input type="text" data-param="width" placeholder="600">
-            height: <input type="text" data-param="height" placeholder="400"><br>
-            at x: <input type="text" data-param="x" placeholder="100">
-            z: <input type="text" data-param="z" placeholder="200"><br>
-            URL: <input type="text" data-param="url" placeholder="http://example.com">
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://example.com' width='600' height='400'&gt;&lt;/iframe&gt;">
+            Iframe Block 1: Width 600 x Height 400
           </div>
-          <!-- Repeat this block 9 more times, each labeled differently -->
-          <div class="block group-iframe" draggable="true" data-code="&lt;iframe style='width:{width}px; height:{height}px; position:absolute; left:{x}px; top:{z}px' src='{url}'&gt;&lt;/iframe&gt;">
-            Create Responsive Iframe 2<br>
-            width: <input type="text" data-param="width" placeholder="600">
-            height: <input type="text" data-param="height" placeholder="400"><br>
-            at x: <input type="text" data-param="x" placeholder="100">
-            z: <input type="text" data-param="z" placeholder="200"><br>
-            URL: <input type="text" data-param="url" placeholder="http://example.com">
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.wikipedia.org' width='800' height='600'&gt;&lt;/iframe&gt;">
+            Iframe Block 2: Width 800 x Height 600
           </div>
-          <!-- Continue adding 8 more blocks for iframe -->
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.youtube.com' width='640' height='480' scrolling='yes'&gt;&lt;/iframe&gt;">
+            Iframe Block 3: Width 640 x Height 480
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.reddit.com' width='500' height='400' style='border: 2px solid #000'&gt;&lt;/iframe&gt;">
+            Iframe Block 4: Width 500 x Height 400
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe title='Custom Title' src='https://www.stackoverflow.com' width='750' height='600'&gt;&lt;/iframe&gt;">
+            Iframe Block 5: Width 750 x Height 600
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.google.com' width='640' height='480' sandbox='allow-scripts'&gt;&lt;/iframe&gt;">
+            Iframe Block 6: Width 640 x Height 480 (Sandbox)
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.instagram.com' width='500' height='500' scrolling='no'&gt;&lt;/iframe&gt;">
+            Iframe Block 7: Width 500 x Height 500
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.twitch.tv' width='400' height='300' style='border-radius: 10px;'&gt;&lt;/iframe&gt;">
+            Iframe Block 8: Width 400 x Height 300
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.nytimes.com' width='600' height='500' title='News'&gt;&lt;/iframe&gt;">
+            Iframe Block 9: Width 600 x Height 500
+          </div>
+          <div class="block group-iframe" draggable="true" data-code="&lt;iframe src='https://www.github.com' width='700' height='400' loading='lazy'&gt;&lt;/iframe&gt;">
+            Iframe Block 10: Width 700 x Height 400
+          </div>
         </div>
+
+        <!-- math -->
         <div class="tabContent" data-tab="math">
-          <!-- 10 blocks for math -->
-          <div class="block group-math" draggable="true" data-code="&lt;div style='width:{width}px; height:{height}px;'&gt;Math Block - Operation: {operation}&lt;/div&gt;">
-            Math Block 1<br>
-            width: <input type="text" data-param="width" placeholder="200">
-            height: <input type="text" data-param="height" placeholder="100"><br>
-            Operation: <input type="text" data-param="operation" placeholder="add">
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msup&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;/math&gt;">
+            Math Block 1: x²
           </div>
-          <!-- Repeat 9 more times for math -->
-          <div class="block group-math" draggable="true" data-code="&lt;div style='width:{width}px; height:{height}px;'&gt;Math Block 2 - Operation: {operation}&lt;/div&gt;">
-            Math Block 2<br>
-            width: <input type="text" data-param="width" placeholder="200">
-            height: <input type="text" data-param="height" placeholder="100"><br>
-            Operation: <input type="text" data-param="operation" placeholder="subtract">
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msub&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/msub&gt;&lt;/math&gt;">
+            Math Block 2: a₁
           </div>
-          <!-- Continue adding 8 more blocks for math -->
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;mfrac&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;/mfrac&gt;&lt;/math&gt;">
+            Math Block 3: 1/x
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msup&gt;&lt;mi&gt;e&lt;/mi&gt;&lt;mi&gt;x&lt;/mi&gt;&lt;/msup&gt;&lt;/math&gt;">
+            Math Block 4: eˣ
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/msup&gt;&lt;/math&gt;">
+            Math Block 5: a²
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msup&gt;&lt;mi&gt;log&lt;/mi&gt;&lt;mn&gt;10&lt;/mn&gt;&lt;/msup&gt;&lt;/math&gt;">
+            Math Block 6: log₁₀
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msub&gt;&lt;mi&gt;f&lt;/mi&gt;&lt;mn&gt;0&lt;/mn&gt;&lt;/msub&gt;&lt;/math&gt;">
+            Math Block 7: f₀
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;mrow&gt;&lt;mi&gt;∑&lt;/mi&gt;&lt;mi&gt;f&lt;/mi&gt;&lt;/mrow&gt;&lt;/math&gt;">
+            Math Block 8: ∑f
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;mi&gt;tan&lt;/mi&gt;&lt;mi&gt;θ&lt;/mi&gt;&lt;/math&gt;">
+            Math Block 9: tan(θ)
+          </div>
+          <div class="block group-math" draggable="true" data-code="&lt;math xmlns='http://www.w3.org/1998/Math/MathML'&gt;&lt;msup&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;mn&gt;3&lt;/mn&gt;&lt;/msup&gt;&lt;/math&gt;">
+            Math Block 10: a³
+          </div>
         </div>
+
+        <!-- JavaScript -->
         <div class="tabContent" data-tab="JavaScript">
-          <!-- 10 blocks for JavaScript -->
-          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;console.log('{message}')&lt;/script&gt;">
-            JavaScript Block 1<br>
-            Message: <input type="text" data-param="message" placeholder="Hello World">
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;alert('Hello World!')&lt;/script&gt;">
+            JavaScript Block 1: alert
           </div>
-          <!-- Repeat 9 more times for JavaScript -->
-          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;console.log('{message}')&lt;/script&gt;">
-            JavaScript Block 2<br>
-            Message: <input type="text" data-param="message" placeholder="Test">
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;document.getElementById('demo').innerHTML = 'Hello!';&lt;/script&gt;">
+            JavaScript Block 2: Change innerHTML
           </div>
-          <!-- Continue adding 8 more blocks for JavaScript -->
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;var x = 10; console.log(x);&lt;/script&gt;">
+            JavaScript Block 3: Variable
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;function greet(name) { alert('Hello ' + name); }&lt;/script&gt;">
+            JavaScript Block 4: Function
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;let x = 5; let y = 10; alert(x + y);&lt;/script&gt;">
+            JavaScript Block 5: Addition
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;for (let i = 0; i &lt; 5; i++) { console.log(i); }&lt;/script&gt;">
+            JavaScript Block 6: Loop
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;setInterval(function() { alert('Hello'); }, 1000);&lt;/script&gt;">
+            JavaScript Block 7: setInterval
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;const car = { make: 'Toyota', model: 'Corolla' };&lt;/script&gt;">
+            JavaScript Block 8: Object
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;document.addEventListener('click', function() { alert('Clicked!'); });&lt;/script&gt;">
+            JavaScript Block 9: Event Listener
+          </div>
+          <div class="block group-JavaScript" draggable="true" data-code="&lt;script&gt;var arr = [1, 2, 3, 4]; arr.forEach(num => console.log(num));&lt;/script&gt;">
+            JavaScript Block 10: Array Iteration
+          </div>
         </div>
+
+        <!-- CSS -->
         <div class="tabContent" data-tab="CSS">
-          <!-- 10 blocks for CSS -->
-          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;{selector}{{property}:{value};}&lt;/style&gt;">
-            CSS Block 1<br>
-            Selector: <input type="text" data-param="selector" placeholder=".class">
-            Property: <input type="text" data-param="property" placeholder="color">
-            Value: <input type="text" data-param="value" placeholder="red">
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;p { color: red; }&lt;/style&gt;">
+            CSS Block 1: Color Red
           </div>
-          <!-- Continue adding 9 more blocks for CSS -->
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;h1 { font-size: 2em; }&lt;/style&gt;">
+            CSS Block 2: Font Size
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;.container { display: flex; justify-content: space-between; }&lt;/style&gt;">
+            CSS Block 3: Flexbox Layout
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;body { background-color: #f0f0f0; }&lt;/style&gt;">
+            CSS Block 4: Background Color
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;.box { border: 2px solid black; padding: 20px; }&lt;/style&gt;">
+            CSS Block 5: Border
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;img { width: 100%; height: auto; }&lt;/style&gt;">
+            CSS Block 6: Image Responsive
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;a:hover { text-decoration: underline; }&lt;/style&gt;">
+            CSS Block 7: Hover Effect
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;button { padding: 10px 20px; background: #4CAF50; color: white; }&lt;/style&gt;">
+            CSS Block 8: Button Style
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;h2 { font-weight: bold; text-align: center; }&lt;/style&gt;">
+            CSS Block 9: Text Align
+          </div>
+          <div class="block group-CSS" draggable="true" data-code="&lt;style&gt;#container { display: grid; grid-template-columns: auto auto; gap: 10px; }&lt;/style&gt;">
+            CSS Block 10: Grid Layout
+          </div>
         </div>
-        <!-- Repeat the same for the other sections (backgrounds, logic, loops, variables, events) -->
+
+        <!-- backgrounds -->
+        <div class="tabContent" data-tab="backgrounds">
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: #f3f3f3; }&lt;/style&gt;">
+            Background Block 1: Light Gray
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-image: url('image.jpg'); background-size: cover; }&lt;/style&gt;">
+            Background Block 2: Image Background
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: #FF6347; }&lt;/style&gt;">
+            Background Block 3: Tomato Color
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background: linear-gradient(to right, red, blue); }&lt;/style&gt;">
+            Background Block 4: Gradient
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: rgba(0, 0, 0, 0.5); }&lt;/style&gt;">
+            Background Block 5: Transparent Black
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: #FFD700; background-repeat: no-repeat; }&lt;/style&gt;">
+            Background Block 6: Yellow Background
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-position: center; }&lt;/style&gt;">
+            Background Block 7: Center Position
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: #ADD8E6; background-size: 100% 100%; }&lt;/style&gt;">
+            Background Block 8: Light Blue Stretch
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-image: url('pattern.png'); background-repeat: repeat; }&lt;/style&gt;">
+            Background Block 9: Pattern
+          </div>
+          <div class="block group-backgrounds" draggable="true" data-code="&lt;style&gt;body { background-color: #90EE90; background-image: linear-gradient(to top, #FF6347, #ADD8E6); }&lt;/style&gt;">
+            Background Block 10: Gradient with Color
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Workspace -->
-    <div id="workspace"></div>
-
-    <!-- Right Panel -->
-    <div id="rightPanel">
+    
+    <div id="workspace">
       <div id="controls">
-        <button id="runCode" class="green-flag">Run</button>
-        <button id="stopCode" class="red-stop">Stop</button>
+        <button class="green-flag flag-btn">Run</button>
+        <button class="red-stop flag-btn">Stop</button>
       </div>
-      <div id="previewText">
-        <pre id="previewCode"></pre>
-      </div>
-      <div id="previewOutput">
-        <iframe id="outputIframe"></iframe>
-      </div>
+      <div id="previewText"></div>
+      <div id="previewOutput"></div>
     </div>
   </div>
-
-  <script>
-    // Tab functionality
-    document.querySelectorAll('#tabButtons button').forEach(button => {
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.tabContent').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('#tabButtons button').forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        const tabName = button.getAttribute('data-tab');
-        document.querySelector(`.tabContent[data-tab="${tabName}"]`).classList.add('active');
-      });
-    });
-
-    // Drag-and-drop functionality for blocks
-    let workspace = document.getElementById('workspace');
-    document.querySelectorAll('.block').forEach(block => {
-      block.addEventListener('dragstart', function(e) {
-        e.dataTransfer.setData('block', JSON.stringify(block.dataset));
-      });
-    });
-
-    workspace.addEventListener('dragover', function(e) {
-      e.preventDefault();
-    });
-
-    workspace.addEventListener('drop', function(e) {
-      e.preventDefault();
-      let data = e.dataTransfer.getData('block');
-      let blockData = JSON.parse(data);
-      let newBlock = document.createElement('div');
-      newBlock.classList.add('block', blockData.class);
-      newBlock.innerHTML = blockData.code;
-      workspace.appendChild(newBlock);
-    });
-
-    // Right-click menu for blocks
-    let contextMenu = document.createElement('div');
-    contextMenu.id = 'contextMenu';
-    contextMenu.innerHTML = `
-      <ul>
-        <li id="copy">Copy</li>
-        <li id="paste">Paste</li>
-        <li id="delete">Delete</li>
-      </ul>
-    `;
-    document.body.appendChild(contextMenu);
-
-    document.addEventListener('contextmenu', function(e) {
-      if (e.target.classList.contains('block')) {
-        e.preventDefault();
-        contextMenu.style.display = 'block';
-        contextMenu.style.left = `${e.pageX}px`;
-        contextMenu.style.top = `${e.pageY}px`;
-      } else {
-        contextMenu.style.display = 'none';
-      }
-    });
-
-    document.getElementById('copy').addEventListener('click', function() {
-      let block = document.querySelector('.block:hover');
-      let copiedBlock = block.cloneNode(true);
-      workspace.appendChild(copiedBlock);
-      contextMenu.style.display = 'none';
-    });
-
-    document.getElementById('paste').addEventListener('click', function() {
-      contextMenu.style.display = 'none';
-      // Add paste functionality if needed
-    });
-
-    document.getElementById('delete').addEventListener('click', function() {
-      let block = document.querySelector('.block:hover');
-      block.remove();
-      contextMenu.style.display = 'none';
-    });
-  </script>
 </body>
 </html>
